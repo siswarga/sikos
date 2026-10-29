@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIKOS - Manajemen & Portal Layanan Kos</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* HERO PORTAL ANAK KOS DENGAN WALLPAPER */
+    .hero-tenant {
+      position: relative;
+      min-height: 88vh;
+      background: linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.75)), 
+                  url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      border-radius: 0 0 24px 24px;
+    }
+
+    .action-icon-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 24px 16px;
+      color: #1e293b;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      cursor: pointer;
+      display: block;
+      border: 2px solid transparent;
+    }
+    .action-icon-card:hover {
+      transform: translateY(-6px);
+      background: #ffffff;
+      border-color: #22c55e;
+      color: #0f172a;
+    }
+
+    /* DENAH STATUS KAMAR ADMIN */
+    .room-card {
+      border-radius: 12px;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .room-empty { background-color: #f0fdf4; border-color: #22c55e; }
+    .room-occupied { background-color: #fef2f2; border-color: #ef4444; }
+    .nav-pills .nav-link.active { background-color: #198754; }
+    .nav-pills .nav-link { color: #475569; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top">
+    <div class="container-fluid px-3 px-md-4">
+      <a class="navbar-brand d-flex align-items-center" href="#" onclick="bukaTampilanPenghuni()">
+        <i class="fas fa-building-user me-2 fs-4"></i>
+        <span class="fw-bold">SIKOS <small class="fw-normal fs-6 opacity-75" id="nav-sub-title">| Layanan Anak Kos</small></span>
+      </a>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Tombol Beralih ke Pemilik (Diproteksi PIN) -->
+        <button id="btnSwitchToAdmin" class="btn btn-outline-light btn-sm fw-bold shadow-sm" onclick="mintaAksesPemilik()">
+          <i class="fas fa-lock me-1"></i> Akses Pemilik Kos
+        </button>
+        <li class="nav-item">
+ 
+        <!-- Tombol Keluar dari Dashboard Pemilik -->
+        <button id="btnSwitchToPenghuni" class="btn btn-warning btn-sm fw-bold shadow-sm d-none" onclick="kunciAksesPemilik()">
+          <i class="fas fa-sign-out-alt me-1"></i> Kembali ke Layanan Kos
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================================================================== -->
+  <!-- 1. DASHBOARD ANAK KOS (TAMPILAN UTAMA & WALLPAPER)                   -->
+  <!-- ==================================================================== -->
+  <div id="section-penghuni">
+    <div class="hero-tenant px-3 py-5 text-center">
+      <div class="container" style="max-width: 720px;">
+        <span class="badge bg-success px-3 py-2 rounded-pill fw-bold mb-3 shadow-sm">
+          <i class="fas fa-sparkles me-1"></i> PORTAL PELAYANAN PENGHUNI
+        </span>
+        <h1 class="display-6 fw-bold mb-2">Ada Kendala di Kamar Kos?</h1>
+        <p class="lead opacity-90 mb-4" style="font-size: 1.05rem;">
+          Sampaikan keluhan fasilitas kamar Anda secara cepat. Laporan langsung diteruskan ke WhatsApp pengelola kos untuk segera diperbaiki.
+        </p>
+
+        <!-- KARTU IKON AKSI CEPAT -->
+        <div class="row g-3 justify-content-center">
+          
+          <!-- IKON 1: SAMPAIKAN KELUHAN -->
+          <div class="col-6 col-md-5">
+            <div class="action-icon-card h-100" onclick="bukaModalKeluhanAnakKos()">
+              <div class="mb-3">
+                <span class="d-inline-flex p-3 rounded-circle bg-danger text-white shadow-sm">
+                  <i class="fas fa-bullhorn fa-2x"></i>
+                </span>
+              </div>
+              <h5 class="fw-bold m-0 text-danger">Sampaikan Keluhan</h5>
+              <small class="text-muted d-block mt-1">Air, Listrik, WiFi, AC & Kamar</small>
+            </div>
+          </div>
+
+          <!-- IKON 2: STATUS SEWA & RIWAYAT -->
+          <div class="col-6 col-md-5">
+            <div class="action-icon-card h-100" onclick="bukaModalCekKamar()">
+              <div class="mb-3">
+                <span class="d-inline-flex p-3 rounded-circle bg-success text-white shadow-sm">
+                  <i class="fas fa-receipt fa-2x"></i>
+                </span>
+              </div>
+              <h5 class="fw-bold m-0 text-success">Cek Sewa & Status</h5>
+              <small class="text-muted d-block mt-1">Tagihan & Tanggapan Pengelola</small>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- 2. DASHBOARD PEMILIK KOS (PANEL OPERASIONAL ADMIN)                   -->
+  <!-- ==================================================================== -->
+  <div id="section-admin" class="container-fluid px-3 px-md-4 py-4 d-none">
+
+    <!-- KARTU STATISTIK -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 bg-white p-3 border-start border-primary border-4 rounded-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small fw-bold">TOTAL KAMAR</div>
+              <h3 class="fw-bold text-primary m-0" id="stat-total-kamar">0</h3>
+            </div>
+            <i class="fas fa-door-closed fa-2x text-primary opacity-25"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 bg-white p-3 border-start border-danger border-4 rounded-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small fw-bold">KAMAR TERISI</div>
+              <h3 class="fw-bold text-danger m-0" id="stat-terisi">0</h3>
+            </div>
+            <i class="fas fa-user-check fa-2x text-danger opacity-25"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 bg-white p-3 border-start border-success border-4 rounded-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small fw-bold">KAMAR KOSONG</div>
+              <h3 class="fw-bold text-success m-0" id="stat-kosong">0</h3>
+            </div>
+            <i class="fas fa-key fa-2x text-success opacity-25"></i>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card shadow-sm border-0 bg-white p-3 border-start border-danger border-4 rounded-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-muted small fw-bold">KELUHAN PENDING</div>
+              <h3 class="fw-bold text-danger m-0" id="stat-keluhan-pending">0</h3>
+            </div>
+            <i class="fas fa-tools fa-2x text-danger opacity-25"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGASI OPERASIONAL -->
+    <div class="card shadow-sm border-0 mb-4 rounded-3">
+      <div class="card-body p-2">
+        <ul class="nav nav-pills nav-fill" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active py-2" data-bs-toggle="pill" data-bs-target="#admin-kamar" type="button">
+              <i class="fas fa-th-large me-2"></i>Denah Kamar
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link py-2" data-bs-toggle="pill" data-bs-target="#admin-penghuni" type="button">
+              <i class="fas fa-users me-2"></i>Data Anak Kos
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link py-2" data-bs-toggle="pill" data-bs-target="#admin-tagihan" type="button">
+              <i class="fas fa-receipt me-2"></i>Sewa & Tagihan
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link py-2 text-danger fw-bold" data-bs-toggle="pill" data-bs-target="#admin-keluhan" type="button">
+              <i class="fas fa-tools me-2"></i>Keluhan Masuk
+          </li>
+          </button>
+             <button class="nav-link py-2" data-bs-toggle="pill" data-bs-target="#admin-seting" type="button" onclick="muatFormPengaturan()">
+             <i class="fas fa-cog me-2"></i>Pengaturan Kos
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- KONTEN TAB ADMIN -->
+    <div class="tab-content">
+      <!-- 1. DENAH KAMAR -->
+      <div class="tab-pane fade show active" id="admin-kamar">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="fw-bold text-dark m-0"><i class="fas fa-layer-group text-success me-2"></i>Denah Kamar Kos</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahKamar">
+              <i class="fas fa-plus me-1"></i> Tambah Kamar
+            </button>
+            <button class="btn btn-success btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCheckIn">
+              <i class="fas fa-user-plus me-1"></i> Check-In
+            </button>
+          </div>
+        </div>
+        <div class="row g-3" id="containerGridKamar"></div>
+      </div>
+
+      <!-- 2. DATA PENGHUNI -->
+      <div class="tab-pane fade" id="admin-penghuni">
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-body p-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-address-book text-primary me-2"></i>Data Lengkap Penghuni</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle border mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>ID</th><th>Kamar</th><th>Nama</th><th>WhatsApp</th><th>Kampus</th><th>Tgl Masuk</th><th>Tempo</th><th>Status</th><th class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyPenghuni" class="small"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. SEWA & TAGIHAN -->
+      <div class="tab-pane fade" id="admin-tagihan">
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-body p-4">
+            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-file-invoice-dollar text-warning me-2"></i>Tagihan & Pembayaran</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle border mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>Invoice</th><th>Kamar</th><th>Periode</th><th>Total</th><th>Jatuh Tempo</th><th>Status</th><th>Tgl Bayar</th><th class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyTagihan" class="small"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. DAFTAR KELUHAN -->
+      <div class="tab-pane fade" id="admin-keluhan">
+        <div class="card shadow-sm border-0 rounded-3">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-danger m-0"><i class="fas fa-tools me-2"></i>Laporan Keluhan dari Anak Kos</h5>
+              <button class="btn btn-outline-danger btn-sm fw-bold" onclick="muatKeluhanAdmin()">
+                <i class="fas fa-sync-alt me-1"></i> Refresh
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle border mb-0">
+                <thead class="table-light small">
+                  <tr>
+                    <th>ID</th><th>Kamar & Nama</th><th>Kategori</th><th>Rincian</th><th>Waktu</th><th>Status</th><th>Tanggapan</th><th class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyKeluhanAdmin" class="small"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- TAB PENGATURAN KOS -->
+<div class="tab-pane fade" id="admin-seting">
+  <div class="card shadow-sm border-0 rounded-3" style="max-width: 600px;">
+    <div class="card-body p-4">
+      <h5 class="fw-bold text-dark mb-3"><i class="fas fa-sliders-h text-success me-2"></i>Pengaturan & Kontak Pengelola</h5>
+      <form onsubmit="submitFormPengaturan(event)">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Nomor WhatsApp Pemilik (Penerima Notifikasi)</label>
+          <input type="tel" class="form-control" id="cfg_wa_pemilik" placeholder="08xxxxxxxxxx" required>
+          <small class="text-muted" style="font-size: 11px;">Nomor ini akan menerima pesan otomatis saat ada keluhan baru & konfirmasi transfer.</small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Nama Rumah Kos</label>
+          <input type="text" class="form-control" id="cfg_nama_kos" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Rekening Pembayaran Sewa</label>
+          <input type="text" class="form-control" id="cfg_rekening" placeholder="BCA 123456789 a.n Pemilik" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">PIN Akses Dashboard Pemilik (6 Digit)</label>
+          <input type="password" maxlength="6" class="form-control" id="cfg_pin" required>
+        </div>
+        <button type="submit" class="btn btn-success fw-bold px-4" id="btnSimpanCfg">
+          <i class="fas fa-save me-1"></i> Simpan Pengaturan
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL-MODAL INTERAKTIF                                               -->
+  <!-- ==================================================================== -->
+
+  <!-- MODAL: SAMPAIKAN KELUHAN (ANAK KOS) -->
+  <div class="modal fade" id="modalLaporKeluhan" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form onsubmit="submitFormKeluhan(event)">
+          <div class="modal-header bg-danger text-white">
+            <h6 class="modal-title fw-bold"><i class="fas fa-bullhorn me-2"></i>Sampaikan Keluhan Fasilitas</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold">Nomor Kamar</label>
+                <input type="text" class="form-control" id="klh_no_kamar" placeholder="Cth: 101" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold">Nama Penghuni</label>
+                <input type="text" class="form-control" id="klh_nama" placeholder="Nama Anda" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Kategori Masalah</label>
+              <select class="form-select" id="klh_kategori" required>
+                <option value="Listrik & Lampu">Listrik / Lampu Mati / Token</option>
+                <option value="Air & Saluran">Air Mati / Keran / Saluran WC</option>
+                <option value="WiFi & Internet">WiFi Lambat / Tidak Konek</option>
+                <option value="Fasilitas Kamar">Kasur / Lemari / AC / Kunci</option>
+                <option value="Kebersihan">Kebersihan Umum / Sampah</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Rincian Kendala</label>
+              <textarea class="form-control" id="klh_deskripsi" rows="3" placeholder="Tuliskan kendala Anda secara jelas..." required></textarea>
+            </div>
+            <small class="text-muted">Laporan ini akan langsung dicatat ke sistem dan mengirim pesan WhatsApp otomatis ke pemilik kos.</small>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            <button type="submit" class="btn btn-danger btn-sm fw-bold" id="btnKirimKlh">Kirim Keluhan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CEK STATUS SEWA & TANGGAPAN (ANAK KOS) -->
+  <div class="modal fade" id="modalCekKamar" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-success text-white">
+          <h6 class="modal-title fw-bold"><i class="fas fa-search me-2"></i>Cek Status Kamar & Keluhan</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div id="formCekAksesKamar">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Nomor Kamar</label>
+              <input type="text" class="form-control" id="cek_kamar" placeholder="Cth: 101" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Nomor WhatsApp Terdaftar</label>
+              <input type="tel" class="form-control" id="cek_wa" placeholder="08xxxxxxxxxx" required>
+            </div>
+            <button class="btn btn-success w-100 fw-bold" onclick="prosesCekKamar()">Lihat Informasi</button>
+          </div>
+          <div id="hasilCekKamar" class="d-none">
+            <!-- Hasil rincian tagihan & keluhan muncul di sini -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <!-- MODAL: TAMBAH UNIT KAMAR BARU (BULANAN, SEMESTER, & TAHUNAN) -->
+<div class="modal fade" id="modalTambahKamar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <form onsubmit="submitFormKamar(event)">
+        <div class="modal-header bg-primary text-white">
+          <h6 class="modal-title fw-bold"><i class="fas fa-plus me-2"></i>Tambah Kamar Baru</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Nomor Kamar</label>
+            <input type="text" class="form-control" id="kamar_no" placeholder="Contoh: 101" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tipe Kamar</label>
+            <select class="form-select" id="kamar_tipe">
+              <option value="Standard Non-AC">Standard Non-AC</option>
+              <option value="Deluxe AC">Deluxe AC</option>
+              <option value="VIP KM Dalam + AC">VIP KM Dalam + AC</option>
+            </select>
+          </div>
+
+          <!-- INPUT 3 SKEMA TARIF SEWA -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tarif per Bulan (Rp)</label>
+            <input type="number" class="form-control fw-bold" id="kamar_tarif" placeholder="1200000" oninput="autoHitungPaketKamar()" required>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Tarif per 6 Bulan (Rp)</label>
+              <input type="number" class="form-control fw-bold text-primary" id="kamar_tarif_semester" placeholder="Otomatis x6" required>
+              <small class="text-muted" style="font-size: 10px;">Bisa diedit jika ada promo semester.</small>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Tarif per Tahun (Rp)</label>
+              <input type="number" class="form-control fw-bold text-success" id="kamar_tarif_tahunan" placeholder="Otomatis x12" required>
+              <small class="text-muted" style="font-size: 10px;">Bisa diedit jika ada diskon tahunan.</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Fasilitas</label>
+            <textarea class="form-control" id="kamar_fasilitas" rows="2" placeholder="Kasur, WiFi, Lemari"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold" id="btnSubmitKamar">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+ <!-- MODAL: CHECK-IN PENGHUNI BARU (MENDUKUNG BULANAN & TAHUNAN) -->
+<div class="modal fade" id="modalCheckIn" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <form onsubmit="submitFormCheckIn(event)">
+        <div class="modal-header bg-success text-white">
+          <h6 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Check-In Anak Kos</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Pilih Kamar Kosong</label>
+            <select class="form-select fw-bold" id="in_no_kamar" onchange="hitungOtomatisTarif()" required></select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Nama Penghuni</label>
+            <input type="text" class="form-control" id="in_nama" placeholder="Nama mahasiswa/penyewa" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">WhatsApp Penghuni</label>
+            <input type="tel" class="form-control" id="in_wa" placeholder="08xxxxxxxxxx" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Kampus / Kantor</label>
+            <input type="text" class="form-control" id="in_kampus" placeholder="UNPAD / ITB / Karyawan">
+          </div>
+
+          <!-- PILIHAN SKEMA SEWA -->
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">Skema Pembayaran</label>
+              <select class="form-select fw-bold" id="in_skema_sewa" onchange="toggleSkemaSewa()" required>
+                <option value="Bulanan">Bulanan</option>
+                <option value="6 Bulan">Per 6 Bulan (Semester)</option>
+                <option value="Tahunan" selected>Tahunan (1 Tahun)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Tanggal Masuk</label>
+              <input type="date" class="form-control" id="in_tgl_masuk" required>
+            </div>
+          </div>
+
+          <!-- KOLOM JATUH TEMPO / TOTAL TAGIHAN (DINAMIS) -->
+          <div class="row g-2 mb-3">
+            <!-- Muncul jika Bulanan -->
+            <div class="col-12" id="box-tempo-bulanan" style="display: none;">
+              <label class="form-label small fw-bold">Jatuh Tempo Tiap Tanggal</label>
+              <input type="number" min="1" max="31" class="form-control" id="in_tgl_tempo" value="1">
+              <small class="text-muted" style="font-size: 11px;">Tagihan rutin akan ditagihkan tiap tanggal ini per bulan.</small>
+            </div>
+
+            <!-- Total Nominal Tagihan Awal -->
+            <div class="col-12">
+              <label class="form-label small fw-bold">Total Nominal Tagihan Awal (Rp)</label>
+              <input type="number" class="form-control fw-bold text-success fs-5" id="in_nominal_tagihan" required>
+              <small class="text-muted" style="font-size: 11px;">Nominal otomatis terhitung sesuai skema sewa (bisa Anda ubah jika ada diskon paket).</small>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-success btn-sm fw-bold" id="btnSubmitCheckIn">Proses Check-In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- MODAL: TANGGAPAN KELUHAN (ADMIN) -->
+  <div class="modal fade" id="modalTanggapanAdmin" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content border-0 shadow">
+        <form onsubmit="submitUpdateKeluhan(event)">
+          <div class="modal-header bg-dark text-white">
+            <h6 class="modal-title fw-bold"><i class="fas fa-reply me-2"></i>Tanggapi Keluhan</h6>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <input type="hidden" id="admin_klh_id">
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Status Penanganan</label>
+              <select class="form-select" id="admin_klh_status">
+                <option value="Menunggu">Menunggu</option>
+                <option value="Diproses">Diproses (Teknisi Dihubungi)</option>
+                <option value="Selesai">Selesai (Sudah Diperbaiki)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Tanggapan untuk Penghuni</label>
+              <textarea class="form-control" id="admin_klh_tanggapan" rows="3" placeholder="Tulis kabar perbaikan di sini..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary btn-sm fw-bold">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FORM PEMBAYARAN ANAK KOS -->
+<div class="modal fade" id="modalBayarTagihan" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 shadow">
+      <form onsubmit="submitKonfirmasiBayar(event)">
+        <div class="modal-header bg-success text-white">
+          <h6 class="modal-title fw-bold"><i class="fas fa-money-bill-wave me-2"></i>Konfirmasi Pembayaran Sewa</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="pay_id_tagihan">
+          
+          <div class="p-3 bg-light rounded-3 mb-3 border">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">No. Invoice:</span>
+              <strong id="pay_lbl_invoice">-</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted small">Periode:</span>
+              <strong id="pay_lbl_periode">-</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted small">Total Tagihan:</span>
+              <strong class="text-success fs-5" id="pay_lbl_nominal">Rp 0</strong>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Metode Pembayaran</label>
+            <select class="form-select" id="pay_metode" required>
+              <option value="Transfer BCA">Transfer BCA</option>
+              <option value="Transfer Mandiri">Transfer Mandiri</option>
+              <option value="Transfer BRI">Transfer BRI</option>
+              <option value="QRIS">QRIS</option>
+              <option value="Tunai / Cash">Tunai / Cash (Titip Penjaga)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Unggah Foto Bukti Transfer / Resi</label>
+            <input type="file" class="form-control" id="pay_file_bukti" accept="image/*">
+            <small class="text-muted" style="font-size: 11px;">Mendukung format JPG, PNG, atau tangkapan layar m-banking.</small>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-success btn-sm fw-bold" id="btnSubmitBayar">Kirim Konfirmasi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+
+// GANTI DENGAN WEB APP URL DARI LANGKAH 2
+const SIKOS_API_URL = "https://script.google.com/macros/s/AKfycbzwgnNM_hEyHwXtdADiSMFo22rmgDNznTkOMS_QvCtOCcxKfS4fkHE3rbo83JILLYcm/exec";
+
+/**
+ * Fungsi perantara pengganti google.script.run
+ */
+async function panggilApiGas(action, data = {}) {
+  try {
+    const response = await fetch(SIKOS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8' // Menghindari CORS Preflight Block
+      },
+      body: JSON.stringify({ action: action, data: data })
+    });
+    return await response.json();
+  } catch (err) {
+    console.error(`Gagal memanggil API ${action}:`, err);
+    return { success: false, message: "Gagal terhubung ke server database." };
+  }
+}
+
+    let globalKamar = [];
+    let globalPenghuni = [];
+    let globalTagihan = [];
+   // ====================================================================
+    // KONTROL STATE PERSISTENCE (MEMPERTAHANKAN HALAMAN SAAT REFRESH)
+    // ====================================================================
+
+    // Cek status autentikasi dari sesi browser
+    let isAdminAuth = sessionStorage.getItem('sikos_admin_auth') === 'true';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('in_tgl_masuk').valueAsDate = new Date();
+
+      // Pasang event listener untuk menyimpan tab admin yang aktif
+      inisialisasiPenyimpanTab();
+
+      // Cek halaman terakhir sebelum di-refresh
+      const lastView = localStorage.getItem('sikos_active_view') || 'penghuni';
+
+      if (lastView === 'admin' && isAdminAuth) {
+        bukaTampilanAdmin(false); // Buka tanpa notifikasi login ulang
+      } else {
+        bukaTampilanPenghuni();
+      }
+    });
+
+    // Simpan otomatis tab yang sedang diklik ke localStorage
+    function inisialisasiPenyimpanTab() {
+      const tabElements = document.querySelectorAll('button[data-bs-toggle="pill"]');
+      tabElements.forEach(tabEl => {
+        tabEl.addEventListener('shown.bs.tab', (event) => {
+          const targetId = event.target.getAttribute('data-bs-target');
+          if (targetId) {
+            localStorage.setItem('sikos_active_tab', targetId);
+          }
+          
+          // Muat data spesifik sesuai tab yang dibuka
+          if (targetId === '#admin-seting' && typeof muatFormPengaturan === 'function') {
+            muatFormPengaturan();
+          } else if (targetId === '#admin-keluhan' && typeof muatKeluhanAdmin === 'function') {
+            muatKeluhanAdmin();
+          }
+        });
+      });
+    }
+
+    // 1. KONTROL TAMPILAN & PROTEKSI PIN
+    function mintaAksesPemilik() {
+      if (isAdminAuth) {
+        bukaTampilanAdmin(false);
+        return;
+      }
+
+      Swal.fire({
+        title: 'Akses Pemilik Kos',
+        text: 'Masukkan 6 digit PIN Pengelola:',
+        input: 'password',
+        inputAttributes: {
+          maxlength: 6,
+          placeholder: '••••••',
+          style: 'text-align: center; letter-spacing: 6px; font-size: 1.5rem; font-weight: bold;'
+        },
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        confirmButtonText: '<i class="fas fa-unlock me-1"></i> Buka Dashboard',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: (pin) => {
+          return new Promise(resolve => {
+            google.script.run
+              .withSuccessHandler(res => resolve(res))
+              .withFailureHandler(err => resolve({ success: false, message: err.message }))
+              .verifikasiPinAdmin(pin);
+          });
+        }
+      }).then(res => {
+        if (res.isConfirmed) {
+          if (res.value && res.value.success) {
+            isAdminAuth = true;
+            sessionStorage.setItem('sikos_admin_auth', 'true');
+            bukaTampilanAdmin(true);
+          } else {
+            Swal.fire('Akses Ditolak', res.value ? res.value.message : 'PIN salah.', 'error');
+          }
+        }
+      });
+    }
+
+    // Buka Dashboard Admin & Pulihkan Tab Terakhir
+    function bukaTampilanAdmin(isFirstLogin = false) {
+      localStorage.setItem('sikos_active_view', 'admin');
+
+      document.getElementById('section-penghuni').classList.add('d-none');
+      document.getElementById('section-admin').classList.remove('d-none');
+      document.getElementById('btnSwitchToAdmin').classList.add('d-none');
+      document.getElementById('btnSwitchToPenghuni').classList.remove('d-none');
+      document.getElementById('nav-sub-title').innerText = '| Pemilik Kos';
+
+      muatDataAdmin();
+      muatKeluhanAdmin();
+
+      // Buka kembali tab yang terakhir aktif
+      const savedTab = localStorage.getItem('sikos_active_tab') || '#admin-kamar';
+      const targetTabBtn = document.querySelector(`button[data-bs-target="${savedTab}"]`);
+      if (targetTabBtn) {
+        bootstrap.Tab.getOrCreateInstance(targetTabBtn).show();
+        if (savedTab === '#admin-seting' && typeof muatFormPengaturan === 'function') {
+          muatFormPengaturan();
+        }
+      }
+
+      if (isFirstLogin) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Akses Diberikan',
+          text: 'Selamat datang di Dashboard Pemilik Kos.',
+          timer: 1300,
+          showConfirmButton: false
+        });
+      }
+    }
+
+    // Buka Portal Anak Kos
+    function bukaTampilanPenghuni() {
+      localStorage.setItem('sikos_active_view', 'penghuni');
+
+      document.getElementById('section-admin').classList.add('d-none');
+      document.getElementById('section-penghuni').classList.remove('d-none');
+      document.getElementById('btnSwitchToPenghuni').classList.add('d-none');
+      document.getElementById('btnSwitchToAdmin').classList.remove('d-none');
+      document.getElementById('nav-sub-title').innerText = '| Layanan Anak Kos';
+    }
+
+    // Kunci Akses Pemilik & Hapus Sesi PIN
+    function kunciAksesPemilik() {
+      isAdminAuth = false;
+      sessionStorage.removeItem('sikos_admin_auth');
+      bukaTampilanPenghuni();
+      Swal.fire({ icon: 'info', title: 'Panel Terkunci', text: 'Kembali ke portal anak kos.', timer: 1200, showConfirmButton: false });
+    }
+
+    // 2. MODAL & FITUR ANAK KOS
+    function bukaModalKeluhanAnakKos() {
+      new bootstrap.Modal(document.getElementById('modalLaporKeluhan')).show();
+    }
+
+    function submitFormKeluhan(e) {
+      e.preventDefault();
+      const payload = {
+        no_kamar: document.getElementById('klh_no_kamar').value.trim(),
+        id_penghuni: 'TENANT',
+        nama_penghuni: document.getElementById('klh_nama').value.trim(),
+        kategori: document.getElementById('klh_kategori').value,
+        deskripsi: document.getElementById('klh_deskripsi').value.trim()
+      };
+
+      const btn = document.getElementById('btnKirimKlh');
+      btn.disabled = true;
+      btn.innerText = 'Mengirim...';
+
+      google.script.run
+        .withSuccessHandler(res => {
+          btn.disabled = false;
+          btn.innerText = 'Kirim Keluhan';
+          if (res && res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('modalLaporKeluhan')).hide();
+            document.getElementById('klh_deskripsi').value = '';
+            Swal.fire('Laporan Terkirim', 'Keluhan Anda sudah diteruskan ke pengelola kos.', 'success');
+          } else {
+            Swal.fire('Gagal', res.message, 'error');
+          }
+        })
+        .withFailureHandler(err => {
+          btn.disabled = false;
+          btn.innerText = 'Kirim Keluhan';
+          Swal.fire('Error', err.message, 'error');
+        })
+        .kirimKeluhanPenghuni(payload);
+    }
+
+    function bukaModalCekKamar() {
+      document.getElementById('formCekAksesKamar').classList.remove('d-none');
+      document.getElementById('hasilCekKamar').classList.add('d-none');
+      new bootstrap.Modal(document.getElementById('modalCekKamar')).show();
+    }
+
+    // VARIABEL PENYIMPAN SEMENTARA DATA TAGIHAN UNTUK PEMBAYARAN
+    let currentTagihanPenghuni = null;
+
+    // 1. CEK STATUS KAMAR DARI PORTAL ANAK KOS
+    function prosesCekKamar() {
+      const kamar = document.getElementById('cek_kamar').value.trim();
+      const wa = document.getElementById('cek_wa').value.trim();
+
+      Swal.showLoading();
+      google.script.run
+        .withSuccessHandler(res => {
+          Swal.close();
+          if (res && res.success) {
+            document.getElementById('formCekAksesKamar').classList.add('d-none');
+            const box = document.getElementById('hasilCekKamar');
+            box.classList.remove('d-none');
+
+            let htmlTagihan = '';
+            if (res.tagihan && res.tagihan.length > 0) {
+              const lastT = res.tagihan[res.tagihan.length - 1];
+              currentTagihanPenghuni = lastT;
+              const statusBayar = (lastT.status || '').toLowerCase();
+
+              let badgeStatus = '';
+              let tombolBayar = '';
+
+              if (statusBayar === 'lunas') {
+                badgeStatus = '<span class="badge bg-success">Lunas</span>';
+              } else if (statusBayar === 'menunggu konfirmasi') {
+                badgeStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu Konfirmasi Pemilik</span>';
+                tombolBayar = '<div class="alert alert-warning py-2 px-3 small mt-2 mb-0"><i class="fas fa-info-circle me-1"></i>Bukti pembayaran Anda sudah diterima dan sedang diperiksa oleh pengelola kos.</div>';
+              } else {
+                badgeStatus = '<span class="badge bg-danger">Belum Bayar</span>';
+                tombolBayar = `
+                  <button class="btn btn-success btn-sm w-100 fw-bold mt-2" onclick="bukaModalBayar('${lastT.id_tagihan}', '${lastT.periode}', '${lastT.total}')">
+                    <i class="fas fa-money-bill-wave me-1"></i> Bayar / Konfirmasi Transfer
+                  </button>`;
+              }
+
+              htmlTagihan = `
+                <div class="p-3 border rounded bg-light mb-3">
+                  <div class="d-flex justify-content-between mb-1"><span>Invoice:</span><b>${lastT.id_tagihan}</b></div>
+                  <div class="d-flex justify-content-between mb-1"><span>Periode:</span><b>${lastT.periode}</b></div>
+                  <div class="d-flex justify-content-between mb-1"><span>Total:</span><b class="text-success">Rp ${Number(lastT.total).toLocaleString('id-ID')}</b></div>
+                  <div class="d-flex justify-content-between align-items-center mb-1"><span>Status:</span>${badgeStatus}</div>
+                  ${tombolBayar}
+                </div>`;
+            } else {
+              htmlTagihan = '<small class="text-muted d-block mb-3">Belum ada tagihan terdaftar.</small>';
+            }
+
+            let htmlKeluhan = res.keluhan.length > 0
+              ? res.keluhan.map(k => `
+                  <div class="border-bottom py-2 small">
+                    <div class="d-flex justify-content-between"><b>${k.kategori}</b><span class="badge bg-secondary">${k.status}</span></div>
+                    <div class="text-muted">${k.deskripsi}</div>
+                    <div class="text-success mt-1"><em>Tanggapan: ${k.tanggapan}</em></div>
+                  </div>`).join('')
+              : '<small class="text-muted">Belum ada riwayat keluhan.</small>';
+
+            box.innerHTML = `
+              <h6 class="fw-bold mb-1">Halo, ${res.penghuni.nama_lengkap} (Kamar ${res.penghuni.no_kamar})</h6>
+              <div class="text-muted small mb-2">Tgl Jatuh Tempo: Tiap tanggal ${res.penghuni.tgl_tempo}</div>
+              <div class="text-muted small mb-3">Rekening Pembayaran: <b>${res.info_kos.rekening}</b></div>
+              <div class="fw-bold small mb-1">Tagihan Sewa:</div>${htmlTagihan}
+              <div class="fw-bold small mb-1">Riwayat Keluhan Kamar:</div>${htmlKeluhan}
+              <button class="btn btn-outline-secondary btn-sm w-100 mt-3" onclick="bukaModalCekKamar()">Cek Kamar Lain</button>
+            `;
+          } else {
+            Swal.fire('Data Tidak Ditemukan', res.message, 'warning');
+          }
+        })
+        .verifikasiAksesPenghuni(kamar, wa);
+    }
+
+    // 2. BUKA MODAL PEMBAYARAN DARI SISI ANAK KOS
+    function bukaModalBayar(idTagihan, periode, total) {
+      document.getElementById('pay_id_tagihan').value = idTagihan;
+      document.getElementById('pay_lbl_invoice').innerText = idTagihan;
+      document.getElementById('pay_lbl_periode').innerText = periode;
+      document.getElementById('pay_lbl_nominal').innerText = 'Rp ' + Number(total).toLocaleString('id-ID');
+      document.getElementById('pay_file_bukti').value = '';
+
+      new bootstrap.Modal(document.getElementById('modalBayarTagihan')).show();
+    }
+
+    // 3. SUBMIT PEMBAYARAN OLEH ANAK KOS
+    function submitKonfirmasiBayar(e) {
+      e.preventDefault();
+      const idTagihan = document.getElementById('pay_id_tagihan').value;
+      const metode = document.getElementById('pay_metode').value;
+      const fileInput = document.getElementById('pay_file_bukti');
+
+      const btn = document.getElementById('btnSubmitBayar');
+      btn.disabled = true;
+      btn.innerText = 'Mengunggah Bukti...';
+
+      const kirimData = (base64Str, namaFile) => {
+        const payload = {
+          id_tagihan: idTagihan,
+          metode_bayar: metode,
+          bukti_base64: base64Str,
+          bukti_nama_file: namaFile
+        };
+
+        google.script.run
+          .withSuccessHandler(res => {
+            btn.disabled = false;
+            btn.innerText = 'Kirim Konfirmasi';
+            if (res && res.success) {
+              bootstrap.Modal.getInstance(document.getElementById('modalBayarTagihan')).hide();
+              bootstrap.Modal.getInstance(document.getElementById('modalCekKamar')).hide();
+              Swal.fire('Berhasil Terkirim', res.message, 'success');
+            } else {
+              Swal.fire('Gagal', res.message, 'error');
+            }
+          })
+          .withFailureHandler(err => {
+            btn.disabled = false;
+            btn.innerText = 'Kirim Konfirmasi';
+            Swal.fire('Error', err.message, 'error');
+          })
+          .konfirmasiPembayaranPenghuni(payload);
+      };
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          kirimData(evt.target.result, file.name);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        kirimData('', '');
+      }
+    }
+
+    // 4. RENDER TABEL TAGIHAN DI DASHBOARD PEMILIK KOS
+    function renderTabelTagihan(list) {
+      const tbody = document.getElementById('tbodyTagihan');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">Belum ada tagihan.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = list.map(t => {
+        const status = (t.status_bayar || '').toLowerCase();
+        let badgeStatus = '';
+        let tombolAksi = '';
+
+        if (status === 'lunas') {
+          badgeStatus = '<span class="badge bg-success">Lunas</span>';
+          tombolAksi = '<span class="text-success small fw-bold"><i class="fas fa-check-double me-1"></i>Selesai</span>';
+        } else if (status === 'menunggu konfirmasi') {
+          badgeStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu Konfirmasi</span>';
+          
+          let btnLihatBukti = (t.link_bukti_transfer && t.link_bukti_transfer !== '-')
+            ? `<a href="${t.link_bukti_transfer}" target="_blank" class="btn btn-outline-primary btn-sm me-1" title="Lihat Foto Bukti Transfer"><i class="fas fa-image"></i></a>`
+            : '';
+
+          tombolAksi = `
+            <div class="d-flex justify-content-center">
+              ${btnLihatBukti}
+              <button class="btn btn-success btn-sm fw-bold me-1" onclick="aksiLunaskan('${t.id_tagihan}')" title="Setujui Pelunasan">
+                <i class="fas fa-check me-1"></i>Terima
+              </button>
+              <button class="btn btn-outline-danger btn-sm" onclick="aksiTolakBayar('${t.id_tagihan}')" title="Tolak Bukti Transfer">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>`;
+        } else {
+          badgeStatus = '<span class="badge bg-danger">Belum Bayar</span>';
+          tombolAksi = `
+            <button class="btn btn-outline-success btn-sm fw-bold" onclick="aksiLunaskan('${t.id_tagihan}')">
+              <i class="fas fa-check me-1"></i>Lunaskan Manual
+            </button>`;
+        }
+
+        return `
+          <tr>
+            <td><b>${t.id_tagihan}</b></td>
+            <td>Kamar ${t.no_kamar}</td>
+            <td>${t.periode_bulan}</td>
+            <td class="fw-bold">Rp ${Number(t.total_tagihan).toLocaleString('id-ID')}</td>
+            <td>${t.tgl_jatuh_tempo}</td>
+            <td>${badgeStatus}</td>
+            <td>${t.tgl_bayar || '-'}</td>
+            <td class="text-center">${tombolAksi}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // 5. AKSI TOLAK PEMBAYARAN OLEH PEMILIK
+    function aksiTolakBayar(idTagihan) {
+      Swal.fire({
+        title: 'Tolak Pembayaran?',
+        text: `Status tagihan ${idTagihan} akan dikembalikan menjadi Belum Bayar.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Ya, Tolak',
+        cancelButtonText: 'Batal'
+      }).then(r => {
+        if (r.isConfirmed) {
+          google.script.run
+            .withSuccessHandler(res => {
+              Swal.fire('Ditolak', res.message, 'info');
+              muatDataAdmin();
+            })
+            .tolakPembayaran(idTagihan, 'Bukti tidak sesuai');
+        }
+      });
+    }
+
+    // 3. FITUR OPERASIONAL PEMILIK (ADMIN)
+    function muatDataAdmin() {
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          globalKamar = res.data || [];
+          renderGridKamar(globalKamar);
+          perbaruiDropdownKamar(globalKamar);
+          hitungStat();
+        }
+      }).getDaftarKamar();
+
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          globalPenghuni = res.data || [];
+          renderTabelPenghuni(globalPenghuni);
+          hitungStat();
+        }
+      }).getDaftarPenghuni();
+
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          globalTagihan = res.data || [];
+          renderTabelTagihan(globalTagihan);
+          hitungStat();
+        }
+      }).getDaftarTagihan();
+    }
+
+    function hitungStat() {
+      const total = globalKamar.length;
+      const terisi = globalKamar.filter(k => (k.status||'').toLowerCase() === 'terisi').length;
+      document.getElementById('stat-total-kamar').innerText = total;
+      document.getElementById('stat-terisi').innerText = terisi;
+      document.getElementById('stat-kosong').innerText = total - terisi;
+    }
+
+    function renderGridKamar(list) {
+  const box = document.getElementById('containerGridKamar');
+  if (!list || list.length === 0) {
+    box.innerHTML = '<div class="col-12 text-center py-4 text-muted">Belum ada data kamar.</div>';
+    return;
+  }
+
+  box.innerHTML = list.map(k => {
+    const isTerisi = (k.status || '').toLowerCase() === 'terisi';
+    let namaPenghuni = '-';
+
+    if (isTerisi) {
+      const p = globalPenghuni.find(item => item.id_penghuni === k.id_penghuni_aktif);
+      if (p) namaPenghuni = p.nama_lengkap;
+    }
+
+    // Mencegah duplikasi kata 'Kamar' jika nomor kamar sudah diisi dengan awalan 'Kamar'
+    const rawNo = String(k.no_kamar || '').trim();
+    const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
+
+    // Format tarif bulanan
+    const tarifFormatted = Number(k.tarif_bulanan || 0).toLocaleString('id-ID');
+
+    return `
+      <div class="col-6 col-md-3">
+        <div class="card room-card ${isTerisi ? 'room-occupied' : 'room-empty'} shadow-sm h-100 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold m-0 text-dark">${labelKamar}</h6>
+            <span class="badge ${isTerisi ? 'bg-danger' : 'bg-success'} rounded-pill" style="font-size: 10px;">
+              ${isTerisi ? 'TERISI' : 'KOSONG'}
+            </span>
+          </div>
+          <div class="fw-bold text-success mb-2">
+            Rp ${tarifFormatted}<small class="text-muted fw-normal" style="font-size: 11px;">/bln</small>
+          </div>
+          <div class="p-2 bg-white rounded border small mt-auto mb-2 text-truncate">
+            <span class="text-muted" style="font-size: 10px;">Penghuni:</span><br><b>${namaPenghuni}</b>
+          </div>
+          ${isTerisi 
+            ? `<button class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="aksiCheckOut('${k.id_penghuni_aktif}', '${k.no_kamar}')">Check-Out</button>`
+            : `<button class="btn btn-success btn-sm w-100 fw-bold" onclick="pilihKamarCheckIn('${k.no_kamar}')">Isi Kamar</button>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function perbaruiDropdownKamar(list) {
+  const sel = document.getElementById('in_no_kamar');
+  if (!sel) return;
+
+  const opsiKamar = list
+    .filter(k => (k.status || '').toLowerCase() !== 'terisi')
+    .map(k => {
+      const rawNo = String(k.no_kamar || '').trim();
+      // Cegah dobel kata 'Kamar' jika nomor sudah mengandung kata tersebut
+      const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
+      const tarif = Number(k.tarif_bulanan || 0).toLocaleString('id-ID');
+
+      return `<option value="${k.no_kamar}">${labelKamar} - Rp ${tarif}</option>`;
+    })
+    .join('');
+
+  sel.innerHTML = '<option value="">-- Pilih Kamar Kosong --</option>' + opsiKamar;
+}
+
+    // 1. Tampilkan / sembunyikan input tanggal tempo bulanan
+function toggleSkemaSewa() {
+  const skema = document.getElementById('in_skema_sewa').value;
+  const boxBulanan = document.getElementById('box-tempo-bulanan');
+  
+  if (boxBulanan) {
+    boxBulanan.style.display = skema.toLowerCase().includes('bulanan') ? 'block' : 'none';
+  }
+
+  hitungOtomatisTarif();
+}
+
+// 2. Hitung nominal pasti: Semester = x6, Tahunan = x12
+function hitungOtomatisTarif() {
+  const noKamar = document.getElementById('in_no_kamar').value;
+  const skema = document.getElementById('in_skema_sewa').value;
+  const inputNominal = document.getElementById('in_nominal_tagihan');
+
+  if (!noKamar) {
+    inputNominal.value = 0;
+    return;
+  }
+
+  // Cari kamar berdasarkan nomornya (fleksibel huruf besar/kecil & spasi)
+  const kamar = globalKamar.find(k => 
+    String(k.no_kamar).trim().toLowerCase() === String(noKamar).trim().toLowerCase()
+  );
+  
+  const tarifBulanan = kamar ? Number(kamar.tarif_bulanan) : 0;
+
+  if (skema.includes('Semester') || skema.includes('6 Bulan')) {
+    // 6 Bulan = 6 x tarif bulanan (Rp 6.000.000)
+    inputNominal.value = tarifBulanan * 6;
+  } else if (skema.includes('Tahun') || skema.includes('1 Tahun')) {
+    // 1 Tahun = 12 x tarif bulanan (Rp 12.000.000)
+    inputNominal.value = tarifBulanan * 12;
+  } else {
+    // Bulanan = 1 x tarif bulanan (Rp 1.000.000)
+    inputNominal.value = tarifBulanan;
+  }
+}
+
+// 3. Pemicu saat tombol 'Isi Kamar' ditekan
+function pilihKamarCheckIn(no) {
+  document.getElementById('in_no_kamar').value = no;
+  toggleSkemaSewa();
+  new bootstrap.Modal(document.getElementById('modalCheckIn')).show();
+}
+
+    function renderTabelPenghuni(list) {
+      const tbody = document.getElementById('tbodyPenghuni');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-3 text-muted">Belum ada anak kos.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(p => `
+        <tr>
+          <td><span class="badge bg-light text-dark border">${p.id_penghuni}</span></td>
+          <td><b>Kamar ${p.no_kamar}</b></td>
+          <td>${p.nama_lengkap}</td>
+          <td><a href="https://wa.me/${p.no_wa}" target="_blank" class="text-success text-decoration-none fw-bold">${p.no_wa}</a></td>
+          <td>${p.kampus_jurusan||'-'}</td>
+          <td>${p.tgl_masuk}</td>
+          <td>Tiap tgl ${p.tgl_jatuh_tempo}</td>
+          <td><span class="badge ${p.status==='Aktif'?'bg-success':'bg-secondary'}">${p.status}</span></td>
+          <td class="text-center">
+            ${p.status==='Aktif' ? `<button class="btn btn-outline-danger btn-sm" onclick="aksiCheckOut('${p.id_penghuni}', '${p.no_kamar}')"><i class="fas fa-sign-out-alt"></i></button>` : '-'}
+          </td>
+        </tr>`).join('');
+    }
+
+    function renderTabelTagihan(list) {
+      const tbody = document.getElementById('tbodyTagihan');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">Belum ada tagihan.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(t => {
+        const isLunas = (t.status_bayar||'').toLowerCase() === 'lunas';
+        return `
+          <tr>
+            <td><b>${t.id_tagihan}</b></td>
+            <td>Kamar ${t.no_kamar}</td>
+            <td>${t.periode_bulan}</td>
+            <td class="fw-bold">Rp ${Number(t.total_tagihan).toLocaleString('id-ID')}</td>
+            <td>${t.tgl_jatuh_tempo}</td>
+            <td><span class="badge ${isLunas?'bg-success':'bg-warning text-dark'}">${t.status_bayar}</span></td>
+            <td>${t.tgl_bayar||'-'}</td>
+            <td class="text-center">
+              ${!isLunas ? `<button class="btn btn-success btn-sm fw-bold" onclick="aksiLunaskan('${t.id_tagihan}')"><i class="fas fa-check me-1"></i>Lunas</button>` : '<i class="fas fa-check-double text-success"></i>'}
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    function muatKeluhanAdmin() {
+      google.script.run.withSuccessHandler(res => {
+        if (res && res.success) {
+          const list = res.data || [];
+          document.getElementById('stat-keluhan-pending').innerText = list.filter(k => k.status !== 'Selesai').length;
+          const tbody = document.getElementById('tbodyKeluhanAdmin');
+          if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-3 text-muted">Belum ada keluhan masuk.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = list.map(k => `
+            <tr>
+              <td><span class="badge bg-light text-dark border">${k.id_keluhan}</span></td>
+              <td><b>Kamar ${k.no_kamar}</b><br><small class="text-muted">${k.nama_penghuni}</small></td>
+              <td><span class="badge bg-secondary">${k.kategori}</span></td>
+              <td>${k.deskripsi}</td>
+              <td class="text-nowrap">${k.tgl_lapor}</td>
+              <td><span class="badge ${k.status==='Selesai'?'bg-success':(k.status==='Diproses'?'bg-warning text-dark':'bg-danger')}">${k.status}</span></td>
+              <td><small class="text-muted">${k.tanggapan||'-'}</small></td>
+              <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm fw-bold" onclick="bukaModalTanggapan('${k.id_keluhan}', '${k.status}', '${(k.tanggapan||'').replace(/'/g, "\\'")}')">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>`).join('');
+        }
+      }).getDaftarKeluhanSemua();
+    }
+
+    function bukaModalTanggapan(id, status, tanggapan) {
+      document.getElementById('admin_klh_id').value = id;
+      document.getElementById('admin_klh_status').value = status;
+      document.getElementById('admin_klh_tanggapan').value = tanggapan === '-' ? '' : tanggapan;
+      new bootstrap.Modal(document.getElementById('modalTanggapanAdmin')).show();
+    }
+
+    function submitUpdateKeluhan(e) {
+      e.preventDefault();
+      const id = document.getElementById('admin_klh_id').value;
+      const status = document.getElementById('admin_klh_status').value;
+      const tanggapan = document.getElementById('admin_klh_tanggapan').value.trim();
+
+      google.script.run.withSuccessHandler(res => {
+        bootstrap.Modal.getInstance(document.getElementById('modalTanggapanAdmin')).hide();
+        Swal.fire('Tersimpan', res.message, 'success');
+        muatKeluhanAdmin();
+      }).updateStatusKeluhan(id, status, tanggapan);
+    }
+
+    function submitFormCheckIn(e) {
+      e.preventDefault();
+      const payload = {
+        no_kamar: document.getElementById('in_no_kamar').value,
+        nama_lengkap: document.getElementById('in_nama').value.trim(),
+        no_wa: document.getElementById('in_wa').value.trim(),
+        kampus_jurusan: document.getElementById('in_kampus').value.trim(),
+        tgl_masuk: document.getElementById('in_tgl_masuk').value,
+        tgl_jatuh_tempo: document.getElementById('in_tgl_tempo').value
+      };
+      google.script.run.withSuccessHandler(res => {
+        bootstrap.Modal.getInstance(document.getElementById('modalCheckIn')).hide();
+        Swal.fire('Berhasil', res.message, 'success');
+        muatDataAdmin();
+      }).prosesCheckInPenghuni(payload);
+    }
+
+    function aksiCheckOut(id, kamar) {
+      Swal.fire({
+        title: `Check-Out Kamar ${kamar}?`,
+        text: 'Kamar akan dikosongkan kembali.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Ya, Check-Out'
+      }).then(r => {
+        if (r.isConfirmed) {
+          google.script.run.withSuccessHandler(res => {
+            Swal.fire('Selesai', res.message, 'success');
+            muatDataAdmin();
+          }).prosesCheckOutPenghuni(id);
+        }
+      });
+    }
+
+    function aksiLunaskan(id) {
+      Swal.fire({
+        title: 'Verifikasi Lunas?',
+        text: `Tandai tagihan ${id} lunas & kirim kuitansi WA?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        confirmButtonText: 'Ya, Lunaskan'
+      }).then(r => {
+        if (r.isConfirmed) {
+          google.script.run.withSuccessHandler(res => {
+            Swal.fire('Lunas', res.message, 'success');
+            muatDataAdmin();
+          }).konfirmasiPelunasan(id, 'Transfer');
+        }
+      });
+    }
+
+    function muatFormPengaturan() {
+  google.script.run.withSuccessHandler(res => {
+    if (res && res.success) {
+      const cfg = res.data;
+      document.getElementById('cfg_wa_pemilik').value = cfg.wa_pemilik || '';
+      document.getElementById('cfg_nama_kos').value = cfg.nama_kos || '';
+      document.getElementById('cfg_rekening').value = cfg.rekening_pembayaran || '';
+      document.getElementById('cfg_pin').value = cfg.pin_pemilik || '123456';
+    }
+  }).getPengaturanKos();
+}
+
+function submitFormPengaturan(e) {
+  e.preventDefault();
+  const payload = {
+    wa_pemilik: document.getElementById('cfg_wa_pemilik').value.trim(),
+    nama_kos: document.getElementById('cfg_nama_kos').value.trim(),
+    rekening_pembayaran: document.getElementById('cfg_rekening').value.trim(),
+    pin_pemilik: document.getElementById('cfg_pin').value.trim()
+  };
+
+  const btn = document.getElementById('btnSimpanCfg');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  google.script.run.withSuccessHandler(res => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save me-1"></i> Simpan Pengaturan';
+    if (res && res.success) {
+      Swal.fire('Berhasil', res.message, 'success');
+    } else {
+      Swal.fire('Gagal', res.message, 'error');
+    }
+  }).simpanPengaturanKos(payload);
+}
+
+// 2. Kirim data kamar baru ke backend
+function submitFormKamar(e) {
+  e.preventDefault();
+  const payload = {
+    no_kamar: document.getElementById('kamar_no').value.trim(),
+    tipe_kamar: document.getElementById('kamar_tipe').value,
+    tarif_bulanan: document.getElementById('kamar_tarif').value,
+    tarif_semester: document.getElementById('kamar_tarif_semester').value,
+    tarif_tahunan: document.getElementById('kamar_tarif_tahunan').value,
+    fasilitas: document.getElementById('kamar_fasilitas').value.trim()
+  };
+
+  const btn = document.getElementById('btnSubmitKamar');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      btn.disabled = false;
+      btn.innerText = 'Simpan';
+      if (res && res.success) {
+        bootstrap.Modal.getInstance(document.getElementById('modalTambahKamar')).hide();
+        document.getElementById('kamar_no').value = '';
+        document.getElementById('kamar_tarif').value = '';
+        document.getElementById('kamar_tarif_semester').value = '';
+        document.getElementById('kamar_tarif_tahunan').value = '';
+        document.getElementById('kamar_fasilitas').value = '';
+        Swal.fire('Berhasil', res.message, 'success');
+        muatDataAdmin();
+      } else {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    })
+    .withFailureHandler(err => {
+      btn.disabled = false;
+      btn.innerText = 'Simpan';
+      Swal.fire('Error', err.message, 'error');
+    })
+    .simpanKamar(payload);
+}
+
+
+
+// 3. Update Fungsi Submit Check-In
+function submitFormCheckIn(e) {
+  e.preventDefault();
+  const payload = {
+    no_kamar: document.getElementById('in_no_kamar').value,
+    nama_lengkap: document.getElementById('in_nama').value.trim(),
+    no_wa: document.getElementById('in_wa').value.trim(),
+    kampus_jurusan: document.getElementById('in_kampus').value.trim(),
+    tgl_masuk: document.getElementById('in_tgl_masuk').value,
+    skema_sewa: document.getElementById('in_skema_sewa').value,
+    tgl_jatuh_tempo: document.getElementById('in_tgl_tempo').value,
+    nominal_sewa_awal: document.getElementById('in_nominal_tagihan').value
+  };
+
+  const btn = document.getElementById('btnSubmitCheckIn');
+  btn.disabled = true;
+  btn.innerText = 'Memproses...';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      btn.disabled = false;
+      btn.innerText = 'Proses Check-In';
+      if (res && res.success) {
+        bootstrap.Modal.getInstance(document.getElementById('modalCheckIn')).hide();
+        Swal.fire('Berhasil', res.message, 'success');
+        muatDataAdmin();
+      } else {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    })
+    .withFailureHandler(err => {
+      btn.disabled = false;
+      btn.innerText = 'Proses Check-In';
+      Swal.fire('Error', err.message, 'error');
+    })
+    .prosesCheckInPenghuni(payload);
+}
+
+// 1. Otomatis hitung tarif tahunan (12 x bulanan) saat input bulanan diketik
+function autoHitungTahunanKamar() {
+  const bulanan = parseInt(document.getElementById('kamar_tarif').value, 10) || 0;
+  document.getElementById('kamar_tarif_tahunan').value = bulanan * 12;
+}
+
+// 2. Submit data kamar baru beserta tarif tahunan
+function submitFormKamar(e) {
+  e.preventDefault();
+  const payload = {
+    no_kamar: document.getElementById('kamar_no').value.trim(),
+    tipe_kamar: document.getElementById('kamar_tipe').value,
+    tarif_bulanan: document.getElementById('kamar_tarif').value,
+    tarif_tahunan: document.getElementById('kamar_tarif_tahunan').value,
+    fasilitas: document.getElementById('kamar_fasilitas').value.trim()
+  };
+
+  const btn = document.getElementById('btnSubmitKamar');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  google.script.run
+    .withSuccessHandler(res => {
+      btn.disabled = false;
+      btn.innerText = 'Simpan';
+      if (res && res.success) {
+        bootstrap.Modal.getInstance(document.getElementById('modalTambahKamar')).hide();
+        document.getElementById('kamar_no').value = '';
+        document.getElementById('kamar_tarif').value = '';
+        document.getElementById('kamar_tarif_tahunan').value = '';
+        document.getElementById('kamar_fasilitas').value = '';
+        Swal.fire('Berhasil', res.message, 'success');
+        muatDataAdmin();
+      } else {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    })
+    .withFailureHandler(err => {
+      btn.disabled = false;
+      btn.innerText = 'Simpan';
+      Swal.fire('Error', err.message, 'error');
+    })
+    .simpanKamar(payload);
+}
+
+  </script>
+</body>
+</html>
