@@ -412,7 +412,7 @@
     </div>
   </div>
 
- <!-- MODAL: TAMBAH UNIT KAMAR BARU (BULANAN, SEMESTER, & TAHUNAN) -->
+<!-- MODAL: TAMBAH UNIT KAMAR BARU (BASE TAHUNAN) -->
 <div class="modal fade" id="modalTambahKamar" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content border-0 shadow">
@@ -435,22 +435,25 @@
             </select>
           </div>
 
-          <!-- INPUT 3 SKEMA TARIF SEWA -->
+          <!-- INPUT UTAMA: TARIF TAHUNAN -->
           <div class="mb-3">
-            <label class="form-label small fw-bold">Tarif per Bulan (Rp)</label>
-            <input type="number" class="form-control fw-bold" id="kamar_tarif" placeholder="1200000" oninput="autoHitungPaketKamar()" required>
+            <label class="form-label small fw-bold">Tarif per Tahun (Rp) <span class="text-danger">*Utama</span></label>
+            <input type="number" class="form-control fw-bold fs-5 text-success" id="kamar_tarif_tahunan" 
+                   placeholder="Contoh: 12000000" oninput="autoHitungDariTahunan()" required>
+            <small class="text-muted" style="font-size: 11px;">Ketik tarif tahunan, sistem otomatis membagi ke semester & bulanan.</small>
           </div>
 
+          <!-- SUB-TARIF: SEMESTER & BULANAN (OTOMATIS TAPI BISA DIEDIT) -->
           <div class="row g-2 mb-3">
             <div class="col-6">
-              <label class="form-label small fw-bold">Tarif per 6 Bulan (Rp)</label>
-              <input type="number" class="form-control fw-bold text-primary" id="kamar_tarif_semester" placeholder="Otomatis x6" required>
-              <small class="text-muted" style="font-size: 10px;">Bisa diedit jika ada promo semester.</small>
+              <label class="form-label small fw-bold">Tarif 6 Bulan (Rp)</label>
+              <input type="number" class="form-control fw-bold text-primary" id="kamar_tarif_semester" placeholder="Otomatis / 2" required>
+              <small class="text-muted" style="font-size: 10px;">Bisa disesuaikan jika ada harga khusus.</small>
             </div>
             <div class="col-6">
-              <label class="form-label small fw-bold">Tarif per Tahun (Rp)</label>
-              <input type="number" class="form-control fw-bold text-success" id="kamar_tarif_tahunan" placeholder="Otomatis x12" required>
-              <small class="text-muted" style="font-size: 10px;">Bisa diedit jika ada diskon tahunan.</small>
+              <label class="form-label small fw-bold">Tarif Bulanan (Rp)</label>
+              <input type="number" class="form-control fw-bold" id="kamar_tarif_bulanan" placeholder="Otomatis / 12" required>
+              <small class="text-muted" style="font-size: 10px;">Bisa dinaikkan jika sewa bulanan.</small>
             </div>
           </div>
 
@@ -461,16 +464,16 @@
         </div>
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-primary btn-sm fw-bold" id="btnSubmitKamar">Simpan</button>
+          <button type="submit" class="btn btn-primary btn-sm fw-bold" id="btnSubmitKamar">Simpan Kamar</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
- <!-- MODAL: CHECK-IN PENGHUNI BARU (MENDUKUNG BULANAN & TAHUNAN) -->
+<!-- MODAL: CHECK-IN ANAK KOS DENGAN KONTAK DARURAT & DURASI KONTRAK -->
 <div class="modal fade" id="modalCheckIn" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form onsubmit="submitFormCheckIn(event)">
         <div class="modal-header bg-success text-white">
@@ -478,54 +481,81 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
+          
           <div class="mb-3">
             <label class="form-label small fw-bold">Pilih Kamar Kosong</label>
-            <select class="form-select fw-bold" id="in_no_kamar" onchange="hitungOtomatisTarif()" required></select>
+            <select class="form-select" id="in_no_kamar" onchange="hitungOtomatisTarif()" required></select>
           </div>
+
           <div class="mb-3">
             <label class="form-label small fw-bold">Nama Penghuni</label>
             <input type="text" class="form-control" id="in_nama" placeholder="Nama mahasiswa/penyewa" required>
           </div>
-          <div class="mb-3">
-            <label class="form-label small fw-bold">WhatsApp Penghuni</label>
-            <input type="tel" class="form-control" id="in_wa" placeholder="08xxxxxxxxxx" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Kampus / Kantor</label>
-            <input type="text" class="form-control" id="in_kampus" placeholder="UNPAD / ITB / Karyawan">
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-bold">WhatsApp Penghuni</label>
+              <input type="tel" class="form-control" id="in_wa" placeholder="08xxxxxxxxxx" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">Kampus / Kantor</label>
+              <input type="text" class="form-control" id="in_kampus" placeholder="UNPAD / ITB / Karyawan">
+            </div>
           </div>
 
-          <!-- PILIHAN SKEMA SEWA -->
+          <!-- INPUT KONTAK DARURAT (ORTU / WALI) -->
+          <div class="p-3 bg-light rounded border mb-3">
+            <span class="badge bg-secondary mb-2">Kontak Darurat (Ortu / Wali)</span>
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">Nama Kontak</label>
+                <input type="text" class="form-control form-control-sm" id="in_kontak_darurat_nama" placeholder="Ayah / Ibu / Wali" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted">No. WA Darurat</label>
+                <input type="tel" class="form-control form-control-sm" id="in_kontak_darurat_wa" placeholder="08xxxxxxxxxx" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- SKEMA & TANGGAL -->
           <div class="row g-2 mb-3">
             <div class="col-6">
               <label class="form-label small fw-bold">Skema Pembayaran</label>
-              <select class="form-select fw-bold" id="in_skema_sewa" onchange="toggleSkemaSewa()" required>
+              <select class="form-select" id="in_skema_sewa" onchange="toggleSkemaSewa()" required>
+                <option value="Tahunan (1 Tahun)">Tahunan (1 Tahun)</option>
+                <option value="Per 6 Bulan (Semester)">Per 6 Bulan (Semester)</option>
                 <option value="Bulanan">Bulanan</option>
-                <option value="6 Bulan">Per 6 Bulan (Semester)</option>
-                <option value="Tahunan" selected>Tahunan (1 Tahun)</option>
               </select>
             </div>
             <div class="col-6">
               <label class="form-label small fw-bold">Tanggal Masuk</label>
-              <input type="date" class="form-control" id="in_tgl_masuk" required>
+              <input type="date" class="form-control" id="in_tgl_masuk" onchange="hitungTanggalSelesai()" required>
             </div>
           </div>
 
-          <!-- KOLOM JATUH TEMPO / TOTAL TAGIHAN (DINAMIS) -->
-          <div class="row g-2 mb-3">
-            <!-- Muncul jika Bulanan -->
-            <div class="col-12" id="box-tempo-bulanan" style="display: none;">
-              <label class="form-label small fw-bold">Jatuh Tempo Tiap Tanggal</label>
-              <input type="number" min="1" max="31" class="form-control" id="in_tgl_tempo" value="1">
-              <small class="text-muted" style="font-size: 11px;">Tagihan rutin akan ditagihkan tiap tanggal ini per bulan.</small>
+          <!-- INFORMASI MASA KONTRAK & TEMPO -->
+          <div class="p-2 mb-3 rounded bg-info-subtle border border-info small">
+            <div class="d-flex justify-content-between">
+              <span>Masa Kontrak:</span>
+              <b id="lbl_masa_kontrak">12 Bulan (1 Tahun)</b>
             </div>
+            <div class="d-flex justify-content-between mt-1">
+              <span>Selesai Sewa:</span>
+              <b id="lbl_tgl_selesai">-</b>
+            </div>
+          </div>
 
-            <!-- Total Nominal Tagihan Awal -->
-            <div class="col-12">
-              <label class="form-label small fw-bold">Total Nominal Tagihan Awal (Rp)</label>
-              <input type="number" class="form-control fw-bold text-success fs-5" id="in_nominal_tagihan" required>
-              <small class="text-muted" style="font-size: 11px;">Nominal otomatis terhitung sesuai skema sewa (bisa Anda ubah jika ada diskon paket).</small>
-            </div>
+          <div class="mb-3" id="box-tempo-bulanan" style="display: none;">
+            <label class="form-label small fw-bold">Jatuh Tempo Tiap Tanggal</label>
+            <input type="number" class="form-control" id="in_tgl_tempo" value="1" min="1" max="28">
+            <small class="text-muted" style="font-size: 11px;">Tagihan rutin akan ditagihkan tiap tanggal ini per bulan.</small>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-bold">Total Nominal Tagihan Awal (Rp)</label>
+            <input type="number" class="form-control fw-bold text-success fs-5" id="in_nominal_tagihan" required>
+            <small class="text-muted" style="font-size: 11px;">Nominal otomatis terhitung sesuai skema sewa.</small>
           </div>
 
         </div>
@@ -821,73 +851,105 @@
       new bootstrap.Modal(document.getElementById('modalCekKamar')).show();
     }
 
-    async function prosesCekKamar() {
-      const kamar = document.getElementById('cek_kamar').value.trim();
-      const wa = document.getElementById('cek_wa').value.trim();
+async function prosesCekKamar() {
+  const kamar = document.getElementById('cek_kamar').value.trim();
+  const wa = document.getElementById('cek_wa').value.trim();
 
-      Swal.showLoading();
-      const res = await panggilApiGas('verifikasiAksesPenghuni', { no_kamar: kamar, no_wa: wa });
-      Swal.close();
+  Swal.showLoading();
+  const res = await panggilApiGas('verifikasiAksesPenghuni', { no_kamar: kamar, no_wa: wa });
+  Swal.close();
 
-      if (res && res.success) {
-        document.getElementById('formCekAksesKamar').classList.add('d-none');
-        const box = document.getElementById('hasilCekKamar');
-        box.classList.remove('d-none');
+  if (res && res.success) {
+    document.getElementById('formCekAksesKamar').classList.add('d-none');
+    const box = document.getElementById('hasilCekKamar');
+    box.classList.remove('d-none');
 
-        let htmlTagihan = '';
-        if (res.tagihan && res.tagihan.length > 0) {
-          const lastT = res.tagihan[res.tagihan.length - 1];
-          const statusBayar = (lastT.status || '').toLowerCase();
-
-          let badgeStatus = '';
-          let tombolBayar = '';
-
-          if (statusBayar === 'lunas') {
-            badgeStatus = '<span class="badge bg-success">Lunas</span>';
-          } else if (statusBayar === 'menunggu konfirmasi') {
-            badgeStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu Konfirmasi</span>';
-            tombolBayar = '<div class="alert alert-warning py-2 px-3 small mt-2 mb-0"><i class="fas fa-info-circle me-1"></i>Bukti pembayaran Anda sedang diperiksa pengelola.</div>';
-          } else {
-            badgeStatus = '<span class="badge bg-danger">Belum Bayar</span>';
-            tombolBayar = `
-              <button class="btn btn-success btn-sm w-100 fw-bold mt-2" onclick="bukaModalBayar('${lastT.id_tagihan}', '${lastT.periode}', '${lastT.total}')">
-                <i class="fas fa-money-bill-wave me-1"></i> Bayar / Konfirmasi Transfer
-              </button>`;
-          }
-
-          htmlTagihan = `
-            <div class="p-3 border rounded bg-light mb-3">
-              <div class="d-flex justify-content-between mb-1"><span>Invoice:</span><b>${lastT.id_tagihan}</b></div>
-              <div class="d-flex justify-content-between mb-1"><span>Periode:</span><b>${lastT.periode}</b></div>
-              <div class="d-flex justify-content-between mb-1"><span>Total:</span><b class="text-success">Rp ${Number(lastT.total).toLocaleString('id-ID')}</b></div>
-              <div class="d-flex justify-content-between align-items-center mb-1"><span>Status:</span>${badgeStatus}</div>
-              ${tombolBayar}
-            </div>`;
-        } else {
-          htmlTagihan = '<small class="text-muted d-block mb-3">Belum ada tagihan.</small>';
-        }
-
-        let htmlKeluhan = res.keluhan.length > 0
-          ? res.keluhan.map(k => `
-              <div class="border-bottom py-2 small">
-                <div class="d-flex justify-content-between"><b>${k.kategori}</b><span class="badge bg-secondary">${k.status}</span></div>
-                <div class="text-muted">${k.deskripsi}</div>
-                <div class="text-success mt-1"><em>Tanggapan: ${k.tanggapan}</em></div>
-              </div>`).join('')
-          : '<small class="text-muted">Belum ada riwayat keluhan.</small>';
-
-        box.innerHTML = `
-          <h6 class="fw-bold mb-1">Halo, ${res.penghuni.nama_lengkap} (Kamar ${res.penghuni.no_kamar})</h6>
-          <div class="text-muted small mb-2">Tgl Jatuh Tempo: Tiap tanggal ${res.penghuni.tgl_tempo}</div>
-          <div class="text-muted small mb-3">Rekening: <b>${res.info_kos.rekening}</b></div>
-          <div class="fw-bold small mb-1">Tagihan Sewa:</div>${htmlTagihan}
-          <div class="fw-bold small mb-1">Riwayat Keluhan:</div>${htmlKeluhan}
-          <button class="btn btn-outline-secondary btn-sm w-100 mt-3" onclick="bukaModalCekKamar()">Cek Kamar Lain</button>
-        `;
-      } else {
-        Swal.fire('Data Tidak Ditemukan', res.message, 'warning');
-      }
+    // 1. Ambil tagihan aktif (utamakan yang belum lunas atau menunggu konfirmasi)
+    let lastT = null;
+    if (res.tagihan && res.tagihan.length > 0) {
+      const belumLunas = res.tagihan.filter(t => (t.status || '').toLowerCase() !== 'lunas');
+      // Mengambil elemen terakhir (.pop()) agar dapat invoice terbaru
+      lastT = belumLunas.length > 0 ? belumLunas[belumLunas.length - 1] : res.tagihan[res.tagihan.length - 1];
     }
+
+    // 2. Render bagian tagihan
+    let htmlTagihan = '';
+    let infoMasaSewa = '';
+
+    if (lastT) {
+      const statusBayar = (lastT.status || '').toLowerCase();
+      const periodeText = lastT.periode || '-';
+
+      // Pembulatan ke atas ke kelipatan 50.000 terdekat
+      const totalNominalAsli = Number(lastT.total || 0);
+      const totalBulat = Math.ceil(totalNominalAsli / 50000) * 50000;
+      const totalFormatted = totalBulat.toLocaleString('id-ID');
+
+      // Tentukan teks masa sewa vs tanggal tempo bulanan
+      const isPaketPanjang = periodeText.includes('Tahun') || periodeText.includes('Semester') || periodeText.includes('s.d');
+      if (isPaketPanjang) {
+        infoMasaSewa = `<div class="text-muted small mb-2"><i class="fas fa-calendar-alt me-1"></i>Masa Kontrak: <b>${periodeText}</b></div>`;
+      } else {
+        infoMasaSewa = `<div class="text-muted small mb-2"><i class="fas fa-clock me-1"></i>Jatuh Tempo: Tiap tanggal <b>${res.penghuni.tgl_tempo || 1}</b></div>`;
+      }
+
+      let badgeStatus = '';
+      let tombolBayar = '';
+
+      if (statusBayar === 'lunas') {
+        badgeStatus = '<span class="badge bg-success">Lunas</span>';
+      } else if (statusBayar === 'menunggu konfirmasi') {
+        badgeStatus = '<span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Menunggu Konfirmasi</span>';
+        tombolBayar = '<div class="alert alert-warning py-2 px-3 small mt-2 mb-0"><i class="fas fa-info-circle me-1"></i>Bukti pembayaran Anda sedang diperiksa pengelola.</div>';
+      } else {
+        badgeStatus = '<span class="badge bg-danger">Belum Bayar</span>';
+        const escapedPeriode = periodeText.replace(/'/g, "\\'");
+        tombolBayar = `
+          <button class="btn btn-success btn-sm w-100 fw-bold mt-2" onclick="bukaModalBayar('${lastT.id_tagihan}', '${escapedPeriode}', '${totalBulat}')">
+            <i class="fas fa-money-bill-wave me-1"></i> Bayar / Konfirmasi Transfer
+          </button>`;
+      }
+
+      htmlTagihan = `
+        <div class="p-3 border rounded bg-light mb-3">
+          <div class="d-flex justify-content-between mb-1"><span>Invoice:</span><b>${lastT.id_tagihan}</b></div>
+          <div class="d-flex justify-content-between mb-1"><span>Periode:</span><b>${periodeText}</b></div>
+          <div class="d-flex justify-content-between mb-1"><span>Total:</span><b class="text-success">Rp ${totalFormatted}</b></div>
+          <div class="d-flex justify-content-between align-items-center mb-1"><span>Status:</span>${badgeStatus}</div>
+          ${tombolBayar}
+        </div>`;
+    } else {
+      infoMasaSewa = `<div class="text-muted small mb-2">Jatuh Tempo: Tiap tanggal <b>${res.penghuni.tgl_tempo || 1}</b></div>`;
+      htmlTagihan = '<small class="text-muted d-block mb-3">Belum ada tagihan aktif.</small>';
+    }
+
+    // 3. Render riwayat keluhan
+    let htmlKeluhan = res.keluhan && res.keluhan.length > 0
+      ? res.keluhan.map(k => `
+          <div class="border-bottom py-2 small">
+            <div class="d-flex justify-content-between"><b>${k.kategori}</b><span class="badge bg-secondary">${k.status}</span></div>
+            <div class="text-muted">${k.deskripsi}</div>
+            <div class="text-success mt-1"><em>Tanggapan: ${k.tanggapan || '-'}</em></div>
+          </div>`).join('')
+      : '<small class="text-muted">Belum ada riwayat keluhan.</small>';
+
+    // 4. Label kamar bersih tanpa dobel kata
+    const rawNoKamar = String(res.penghuni.no_kamar || '').trim();
+    const labelKamarBersih = rawNoKamar.toLowerCase().startsWith('kamar') ? rawNoKamar : `Kamar ${rawNoKamar}`;
+    const infoRekening = (res.info_kos && res.info_kos.rekening) ? res.info_kos.rekening : 'Hubungi Pengelola Kos';
+
+    box.innerHTML = `
+      <h6 class="fw-bold mb-1">Halo, ${res.penghuni.nama_lengkap} (${labelKamarBersih})</h6>
+      ${infoMasaSewa}
+      <div class="text-muted small mb-3"><i class="fas fa-university me-1"></i>Rekening: <b>${infoRekening}</b></div>
+      <div class="fw-bold small mb-1">Tagihan Sewa:</div>${htmlTagihan}
+      <div class="fw-bold small mb-1">Riwayat Keluhan:</div>${htmlKeluhan}
+      <button class="btn btn-outline-secondary btn-sm w-100 mt-3" onclick="bukaModalCekKamar()">Cek Kamar Lain</button>
+    `;
+  } else {
+    Swal.fire('Data Tidak Ditemukan', res.message || 'Kamar atau nomor WhatsApp tidak cocok.', 'warning');
+  }
+}
 
     function bukaModalBayar(idTagihan, periode, total) {
       document.getElementById('pay_id_tagihan').value = idTagihan;
@@ -976,98 +1038,73 @@
       document.getElementById('stat-kosong').innerText = total - terisi;
     }
 
-    function renderGridKamar(list) {
-      const box = document.getElementById('containerGridKamar');
-      if (!list || list.length === 0) {
-        box.innerHTML = '<div class="col-12 text-center py-4 text-muted">Belum ada data kamar.</div>';
-        return;
-      }
-      box.innerHTML = list.map(k => {
-        const isTerisi = (k.status || '').toLowerCase() === 'terisi';
-        let namaPenghuni = '-';
-        if (isTerisi) {
-          const p = globalPenghuni.find(item => item.id_penghuni === k.id_penghuni_aktif);
-          if (p) namaPenghuni = p.nama_lengkap;
-        }
-
-        const rawNo = String(k.no_kamar || '').trim();
-        const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
-        const tarifFormatted = Number(k.tarif_bulanan || 0).toLocaleString('id-ID');
-
-        return `
-          <div class="col-6 col-md-3">
-            <div class="card room-card ${isTerisi ? 'room-occupied' : 'room-empty'} shadow-sm h-100 p-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="fw-bold m-0 text-dark">${labelKamar}</h6>
-                <span class="badge ${isTerisi ? 'bg-danger' : 'bg-success'} rounded-pill" style="font-size: 10px;">
-                  ${isTerisi ? 'TERISI' : 'KOSONG'}
-                </span>
-              </div>
-              <div class="fw-bold text-success mb-2">
-                Rp ${tarifFormatted}<small class="text-muted fw-normal" style="font-size: 11px;">/bln</small>
-              </div>
-              <div class="p-2 bg-white rounded border small mt-auto mb-2 text-truncate">
-                <span class="text-muted" style="font-size: 10px;">Penghuni:</span><br><b>${namaPenghuni}</b>
-              </div>
-              ${isTerisi 
-                ? `<button class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="aksiCheckOut('${k.id_penghuni_aktif}', '${k.no_kamar}')">Check-Out</button>`
-                : `<button class="btn btn-success btn-sm w-100 fw-bold" onclick="pilihKamarCheckIn('${k.no_kamar}')">Isi Kamar</button>`}
-            </div>
-          </div>`;
-      }).join('');
-    }
-
     function perbaruiDropdownKamar(list) {
-      const sel = document.getElementById('in_no_kamar');
-      if (!sel) return;
-      const opsi = list
-        .filter(k => (k.status || '').toLowerCase() !== 'terisi')
-        .map(k => {
-          const rawNo = String(k.no_kamar || '').trim();
-          const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
-          return `<option value="${k.no_kamar}">${labelKamar} - Rp ${Number(k.tarif_bulanan||0).toLocaleString('id-ID')}</option>`;
-        }).join('');
-      sel.innerHTML = '<option value="">-- Pilih Kamar Kosong --</option>' + opsi;
-    }
+  const sel = document.getElementById('in_no_kamar');
+  if (!sel) return;
 
-    function toggleSkemaSewa() {
-      const skema = document.getElementById('in_skema_sewa').value;
-      const boxBulanan = document.getElementById('box-tempo-bulanan');
-      if (boxBulanan) {
-        boxBulanan.style.display = skema.toLowerCase().includes('bulanan') ? 'block' : 'none';
-      }
-      hitungOtomatisTarif();
-    }
+  const opsi = list
+    .filter(k => (k.status || '').toLowerCase() !== 'terisi')
+    .map(k => {
+      const rawNo = String(k.no_kamar || '').trim();
+      const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
+      const tarifThn = Number(k.tarif_tahunan || (k.tarif_bulanan * 12)).toLocaleString('id-ID');
 
-    function hitungOtomatisTarif() {
-      const noKamar = document.getElementById('in_no_kamar').value;
-      const skema = document.getElementById('in_skema_sewa').value;
-      const inputNominal = document.getElementById('in_nominal_tagihan');
+      return `<option value="${k.no_kamar}">${labelKamar} - Rp ${tarifThn}/thn</option>`;
+    }).join('');
 
-      if (!noKamar) {
-        inputNominal.value = 0;
-        return;
-      }
+  sel.innerHTML = '<option value="">-- Pilih Kamar Kosong --</option>' + opsi;
+}
 
-      const kamar = globalKamar.find(k => 
-        String(k.no_kamar).trim().toLowerCase() === String(noKamar).trim().toLowerCase()
-      );
-      const tarifBulanan = kamar ? Number(kamar.tarif_bulanan) : 0;
+function toggleSkemaSewa() {
+  const skema = document.getElementById('in_skema_sewa').value;
+  const boxBulanan = document.getElementById('box-tempo-bulanan');
+  if (boxBulanan) {
+    boxBulanan.style.display = skema.toLowerCase().includes('bulanan') ? 'block' : 'none';
+  }
+  hitungOtomatisTarif();
+  hitungTanggalSelesai();
+}
 
-      if (skema.includes('Semester') || skema.includes('6 Bulan')) {
-        inputNominal.value = tarifBulanan * 6;
-      } else if (skema.includes('Tahun') || skema.includes('1 Tahun')) {
-        inputNominal.value = tarifBulanan * 12;
-      } else {
-        inputNominal.value = tarifBulanan;
-      }
-    }
+function hitungTanggalSelesai() {
+  const tglMasukStr = document.getElementById('in_tgl_masuk').value;
+  const skema = document.getElementById('in_skema_sewa').value;
+  const lblMasa = document.getElementById('lbl_masa_kontrak');
+  const lblSelesai = document.getElementById('lbl_tgl_selesai');
+
+  if (!tglMasukStr) return;
+
+  const tglMasuk = new Date(tglMasukStr);
+  let durasiBulan = 12;
+
+  if (skema.includes('Semester') || skema.includes('6 Bulan')) {
+    durasiBulan = 6;
+    lblMasa.innerText = "6 Bulan (1 Semester)";
+  } else if (skema.includes('Bulanan')) {
+    durasiBulan = 1;
+    lblMasa.innerText = "1 Bulan (Rutin)";
+  } else {
+    durasiBulan = 12;
+    lblMasa.innerText = "12 Bulan (1 Tahun)";
+  }
+
+  const tglAkhir = new Date(tglMasuk);
+  tglAkhir.setMonth(tglAkhir.getMonth() + durasiBulan);
+
+  const tglFormatted = tglAkhir.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  lblSelesai.innerText = tglFormatted;
+}
 
     function pilihKamarCheckIn(no) {
-      document.getElementById('in_no_kamar').value = no;
-      toggleSkemaSewa();
-      new bootstrap.Modal(document.getElementById('modalCheckIn')).show();
-    }
+  document.getElementById('in_no_kamar').value = no;
+  toggleSkemaSewa();
+  hitungOtomatisTarif();
+  new bootstrap.Modal(document.getElementById('modalCheckIn')).show();
+}
 
     function renderTabelPenghuni(list) {
       const tbody = document.getElementById('tbodyPenghuni');
@@ -1191,48 +1228,44 @@
       muatKeluhanAdmin();
     }
 
-    async function submitFormKamar(e) {
-      e.preventDefault();
-      const payload = {
-        no_kamar: document.getElementById('kamar_no').value.trim(),
-        tipe_kamar: document.getElementById('kamar_tipe').value,
-        tarif_bulanan: document.getElementById('kamar_tarif').value,
-        fasilitas: document.getElementById('kamar_fasilitas').value.trim()
-      };
+async function submitFormCheckIn(e) {
+  e.preventDefault();
 
-      const res = await panggilApiGas('simpanKamar', payload);
-      if (res && res.success) {
-        bootstrap.Modal.getInstance(document.getElementById('modalTambahKamar')).hide();
-        document.getElementById('kamar_no').value = '';
-        Swal.fire('Berhasil', res.message, 'success');
-        muatDataAdmin();
-      } else {
-        Swal.fire('Gagal', res.message, 'error');
-      }
-    }
+  const skema = document.getElementById('in_skema_sewa').value;
+  let durasiBulan = 12;
+  if (skema.includes('Semester') || skema.includes('6 Bulan')) durasiBulan = 6;
+  if (skema.includes('Bulanan')) durasiBulan = 1;
 
-    async function submitFormCheckIn(e) {
-      e.preventDefault();
-      const payload = {
-        no_kamar: document.getElementById('in_no_kamar').value,
-        nama_lengkap: document.getElementById('in_nama').value.trim(),
-        no_wa: document.getElementById('in_wa').value.trim(),
-        kampus_jurusan: document.getElementById('in_kampus').value.trim(),
-        tgl_masuk: document.getElementById('in_tgl_masuk').value,
-        skema_sewa: document.getElementById('in_skema_sewa').value,
-        tgl_jatuh_tempo: document.getElementById('in_tgl_tempo').value,
-        nominal_sewa_awal: document.getElementById('in_nominal_tagihan').value
-      };
+  const payload = {
+    no_kamar: document.getElementById('in_no_kamar').value,
+    nama_lengkap: document.getElementById('in_nama').value.trim(),
+    no_wa: document.getElementById('in_wa').value.trim(),
+    kampus_jurusan: document.getElementById('in_kampus').value.trim(),
+    nama_kontak_darurat: document.getElementById('in_kontak_darurat_nama').value.trim(),
+    wa_kontak_darurat: document.getElementById('in_kontak_darurat_wa').value.trim(),
+    tgl_masuk: document.getElementById('in_tgl_masuk').value,
+    skema_sewa: skema,
+    durasi_bulan: durasiBulan,
+    tgl_jatuh_tempo: document.getElementById('in_tgl_tempo').value || 1,
+    nominal_sewa_awal: parseInt(document.getElementById('in_nominal_tagihan').value, 10) || 0
+  };
 
-      const res = await panggilApiGas('prosesCheckInPenghuni', payload);
-      if (res && res.success) {
-        bootstrap.Modal.getInstance(document.getElementById('modalCheckIn')).hide();
-        Swal.fire('Berhasil', res.message, 'success');
-        muatDataAdmin();
-      } else {
-        Swal.fire('Gagal', res.message, 'error');
-      }
-    }
+  const btn = document.getElementById('btnSubmitCheckIn');
+  btn.disabled = true;
+  btn.innerText = 'Memproses...';
+
+  const res = await panggilApiGas('prosesCheckInPenghuni', payload);
+  btn.disabled = false;
+  btn.innerText = 'Proses Check-In';
+
+  if (res && res.success) {
+    bootstrap.Modal.getInstance(document.getElementById('modalCheckIn')).hide();
+    Swal.fire('Check-In Berhasil', res.message, 'success');
+    muatDataAdmin();
+  } else {
+    Swal.fire('Gagal', res.message, 'error');
+  }
+}
 
     function aksiCheckOut(id, kamar) {
       Swal.fire({
@@ -1318,6 +1351,137 @@
 
       Swal.fire(res && res.success ? 'Berhasil' : 'Gagal', res.message, res && res.success ? 'success' : 'error');
     }
+	
+function autoHitungDariTahunan() {
+  const tahunan = parseInt(document.getElementById('kamar_tarif_tahunan').value, 10) || 0;
+
+  document.getElementById('kamar_tarif_semester').value = Math.ceil(tahunan / 2);
+  // 16.000.000 / 12 = 1.333.333 -> dibulatkan jadi 1.350.000
+  document.getElementById('kamar_tarif_bulanan').value = Math.ceil((tahunan / 12) / 50000) * 50000;
+}
+
+// 2. Submit Kamar Baru ke Backend
+async function submitFormKamar(e) {
+  e.preventDefault();
+
+  const payload = {
+    no_kamar: document.getElementById('kamar_no').value.trim(),
+    tipe_kamar: document.getElementById('kamar_tipe').value,
+    tarif_tahunan: parseInt(document.getElementById('kamar_tarif_tahunan').value, 10) || 0,
+    tarif_semester: parseInt(document.getElementById('kamar_tarif_semester').value, 10) || 0,
+    tarif_bulanan: parseInt(document.getElementById('kamar_tarif_bulanan').value, 10) || 0,
+    fasilitas: document.getElementById('kamar_fasilitas').value.trim()
+  };
+
+  const btn = document.getElementById('btnSubmitKamar');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  const res = await panggilApiGas('simpanKamar', payload);
+  btn.disabled = false;
+  btn.innerText = 'Simpan Kamar';
+
+  if (res && res.success) {
+    bootstrap.Modal.getInstance(document.getElementById('modalTambahKamar')).hide();
+    document.getElementById('kamar_no').value = '';
+    document.getElementById('kamar_tarif_tahunan').value = '';
+    document.getElementById('kamar_tarif_semester').value = '';
+    document.getElementById('kamar_tarif_bulanan').value = '';
+    document.getElementById('kamar_fasilitas').value = '';
+    Swal.fire('Berhasil', res.message, 'success');
+    muatDataAdmin();
+  } else {
+    Swal.fire('Gagal', res.message, 'error');
+  }
+}
+
+// 3. Hitung Dinamis pada Modal Check-In Anak Kos
+function hitungOtomatisTarif() {
+  const noKamar = document.getElementById('in_no_kamar').value;
+  const skema = document.getElementById('in_skema_sewa').value;
+  const inputNominal = document.getElementById('in_nominal_tagihan');
+
+  if (!noKamar) {
+    inputNominal.value = 0;
+    return;
+  }
+
+  const kamar = globalKamar.find(k => 
+    String(k.no_kamar).trim().toLowerCase() === String(noKamar).trim().toLowerCase()
+  );
+
+  if (!kamar) {
+    inputNominal.value = 0;
+    return;
+  }
+
+  const thn = Number(kamar.tarif_tahunan || 0);
+  const smt = Number(kamar.tarif_semester || Math.ceil(thn / 2));
+  
+  // Dibulatkan seragam ke 50.000 terdekat
+  const bln = Number(kamar.tarif_bulanan) > 0 
+    ? Math.ceil(Number(kamar.tarif_bulanan) / 50000) * 50000 
+    : Math.ceil((thn / 12) / 50000) * 50000;
+
+  if (skema.includes('Semester') || skema.includes('6 Bulan')) {
+    inputNominal.value = smt;
+  } else if (skema.includes('Bulanan')) {
+    inputNominal.value = bln; // Menghasilkan 1350000
+  } else {
+    inputNominal.value = thn; // Menghasilkan 16000000
+  }
+}
+
+// 4. Update Tampilan Kartu Kamar (Menampilkan Harga Tahunan Sebagai Harga Utama)
+function renderGridKamar(list) {
+  const box = document.getElementById('containerGridKamar');
+  if (!list || list.length === 0) {
+    box.innerHTML = '<div class="col-12 text-center py-4 text-muted">Belum ada data kamar.</div>';
+    return;
+  }
+
+  box.innerHTML = list.map(k => {
+    const isTerisi = (k.status || '').toLowerCase() === 'terisi';
+    let namaPenghuni = '-';
+    if (isTerisi) {
+      const p = globalPenghuni.find(item => item.id_penghuni === k.id_penghuni_aktif);
+      if (p) namaPenghuni = p.nama_lengkap;
+    }
+
+    const rawNo = String(k.no_kamar || '').trim();
+    const labelKamar = rawNo.toLowerCase().startsWith('kamar') ? rawNo : `Kamar ${rawNo}`;
+    
+    const thnVal = Number(k.tarif_tahunan || 0);
+	const blnBulat = Math.ceil((thnVal / 12) / 50000) * 50000;
+
+	const tarifThn = thnVal.toLocaleString('id-ID');
+	const tarifBln = blnBulat.toLocaleString('id-ID');
+
+    return `
+      <div class="col-6 col-md-3">
+        <div class="card room-card ${isTerisi ? 'room-occupied' : 'room-empty'} shadow-sm h-100 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold m-0 text-dark">${labelKamar}</h6>
+            <span class="badge ${isTerisi ? 'bg-danger' : 'bg-success'} rounded-pill" style="font-size: 10px;">
+              ${isTerisi ? 'TERISI' : 'KOSONG'}
+            </span>
+          </div>
+          <div class="fw-bold text-success mb-1">
+            Rp ${tarifThn}<small class="text-muted fw-normal" style="font-size: 11px;">/thn</small>
+          </div>
+          <small class="text-muted d-block mb-2" style="font-size: 11px;">
+            (Rp ${tarifBln}/bln)
+          </small>
+          <div class="p-2 bg-white rounded border small mt-auto mb-2 text-truncate">
+            <span class="text-muted" style="font-size: 10px;">Penghuni:</span><br><b>${namaPenghuni}</b>
+          </div>
+          ${isTerisi 
+            ? `<button class="btn btn-outline-danger btn-sm w-100 fw-bold" onclick="aksiCheckOut('${k.id_penghuni_aktif}', '${k.no_kamar}')">Check-Out</button>`
+            : `<button class="btn btn-success btn-sm w-100 fw-bold" onclick="pilihKamarCheckIn('${k.no_kamar}')">Isi Kamar</button>`}
+        </div>
+      </div>`;
+  }).join('');
+}
   </script>
 </body>
 </html>
